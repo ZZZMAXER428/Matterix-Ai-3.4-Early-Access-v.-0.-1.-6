@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MATTERIX AI 3.4 v. 0. 1. 6</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      text-align: center;
+      padding: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      background: #000;
+      color: white;
+      text-shadow: 0 0 8px cyan, 0 0 12px green;
+      animation: glow 2s infinite alternate;
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 8px cyan, 0 0 12px green; }
+      to { text-shadow: 0 0 12px green, 0 0 20px cyan; }
+    }
+    #chat {
+      flex: 1;
+      padding: 8px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .bubble {
+      max-width: 80%;
+      padding: 8px 12px;
+      border-radius: 18px;
+      margin: 5px;
+      font-size: 14px;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+    .user {
+      align-self: flex-end;
+      background: cyan;
+      color: black;
+    }
+    .ai {
+      align-self: flex-start;
+      background: #e0e0e0;
+      color: black;
+    }
+    .ask-area {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      background: white;
+      border-top: 1px solid #ccc;
+      position: sticky;
+      bottom: 0;
+    }
+    .ask-area input {
+      flex: 1;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      padding: 8px 12px;
+      font-size: 14px;
+      outline: none;
+    }
+    .ask-area button {
+      margin-left: 6px;
+      background: cyan;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+    }
+    .global-timer {
+      font-size: 11px;
+      color: gray;
+      margin-left: 8px;
+      min-width: 60px;
+      text-align: right;
+    }
+    .typing {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 8px;
+    }
+    .robot {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .robot::after {
+      content: "";
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid;
+      border-image: linear-gradient(45deg, cyan, blue, green) 1;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    .dots {
+      background: #e0e0e0;
+      border-radius: 15px;
+      padding: 4px 10px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      min-width: 40px;
+      justify-content: center;
+    }
+    .dot {
+      animation: jump 1.2s infinite;
+      margin: 0 1px;
+    }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes jump {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-4px); }
+    }
+    .timer {
+      font-size: 12px;
+      color: gray;
+      min-width: 36px;
+    }
+  </style>
+</head>
+<body>
+  <header>01 MATTERIX AI🤖</header>
+
+  <div id="chat">
+    <div class="bubble ai">Hi, I'm Matterix Ai 👋</div>
+  </div>
+
+  <div id="typingBox" class="typing" style="display:none;">
+    <div class="robot">🤖</div>
+    <div class="dots">
+      <span class="dot">.</span>
+      <span class="dot">.</span>
+      <span class="dot">.</span>
+    </div>
+    <div class="timer">0.0s</div>
+  </div>
+
+  <div class="ask-area">
+    <input id="userInput" placeholder="Ask Matterix..." />
+    <button id="askBtn">Ask ↑</button>
+    <div class="global-timer">0.0s</div>
+  </div>
+
+<script>
+const API_KEY = "AIzaSyA7HfzYU3q2KmZb9LNY2w-jhMCBGL_yT-Q"; 
+const chatBox = document.getElementById("chat");
+const input = document.getElementById("userInput");
+const askBtn = document.getElementById("askBtn");
+const typingBox = document.getElementById("typingBox");
+const localTimer = typingBox.querySelector(".timer");
+const globalTimer = document.querySelector(".global-timer");
+
+let localStart, globalStart, localInterval, globalInterval;
+
+function startTimers() {
+  typingBox.style.display = "flex";
+  localStart = Date.now();
+  globalStart = Date.now();
+  localInterval = setInterval(() => {
+    let elapsed = (Date.now() - localStart) / 1000;
+    localTimer.textContent = elapsed.toFixed(2) + "s";
+  }, 50);
+  globalInterval = setInterval(() => {
+    let elapsed = (Date.now() - globalStart) / 1000;
+    globalTimer.textContent = elapsed.toFixed(2) + "s";
+  }, 50);
+}
+function stopTimers() {
+  typingBox.style.display = "none";
+  clearInterval(localInterval);
+  clearInterval(globalInterval);
+}
+function addMessage(text, cls) {
+  let div = document.createElement("div");
+  div.className = "bubble " + cls;
+  div.textContent = text;
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+function isMathExpression(str) {
+  return /^[0-9+\-*/().\s^sqrt]+$/.test(str.toLowerCase());
+}
+function calculateMath(expr) {
+  try {
+    expr = expr.replace(/sqrt([^)]+)/g, "Math.sqrt($1)");
+    let result = eval(expr);
+    if (typeof result === "number" && !isNaN(result)) {
+      if (Number.isInteger(result)) return result.toString();
+      return result + "  (≈ " + result.toFixed(2) + ")";
+    } else return "❌ Invalid math expression.";
+  } catch {
+    return "❌ Invalid math expression.";
+  }
+}
+function customResponse(q) {
+  let lower = q.toLowerCase();
+  if (lower.includes("your name is very long") || lower.includes("tumhara naam bahut lamba") || lower.includes("naam bohot lamba")) {
+    return "Hehe, yup, my name is very long 😅";
+  }
+  if (lower.includes("good ai") || lower.includes("accha ai") || lower.includes("bahut achha ai") || lower.includes("bohot acha ai")) {
+    return "Yes, I'm, and I'm glad I can answer correct answers ✅";
+  }
+  if (lower.includes("what is your name") || lower.includes("tumhara naam kya hai") || lower.includes("aapka naam kya hai") || lower.includes("naam kya hai")) {
+    return "My name is META Intel IGem-GPTai 🤖";
+  }
+  return null;
+}
+async function askMatterix(q) {
+  addMessage(q, "user");
+  startTimers();
+  if (isMathExpression(q)) {
+    setTimeout(() => {
+      let ans = calculateMath(q);
+      addMessage(ans, "ai");
+      stopTimers();
+    }, 400);
+    return;
+  }
+  let instant = customResponse(q);
+  if (instant) {
+    setTimeout(() => {
+      addMessage(instant, "ai");
+      stopTimers();
+    }, 300);
+    return;
+  }
+  try {
+    let res = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + API_KEY,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: q }]}]
+        })
+      }
+    );
+    let data = await res.json();
+    let text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "❌ No response";
+    addMessage(text, "ai");
+  } catch (e) {
+    addMessage("⚠️ Error: " + e, "ai");
+  }
+  stopTimers();
+}
+askBtn.onclick = () => {
+  if (!input.value.trim()) return;
+  askMatterix(input.value.trim());
+  input.value = "";
+};
+</script>
+</body>
+</html>
