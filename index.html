@@ -3,9 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MATTERIX AI 4.1 v.0.1.7 Pro</title>
+<title>MatterixAI 4.2 v.0.1.3</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
+  * {
+    box-sizing: border-box;
+  }
   body {
     background: #0c0f17;
     color: white;
@@ -15,7 +18,10 @@
     align-items: center;
     height: 100vh;
     margin: 0;
+    overflow: hidden;
   }
+
+  /* TOP HEADER */
   header {
     width: 100%;
     text-align: center;
@@ -26,12 +32,131 @@
     background: #000;
     text-shadow: 0 0 8px #00ffff, 0 0 12px #00ff6a;
     animation: glow 2s infinite alternate;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   @keyframes glow {
     from { text-shadow: 0 0 8px #00ffff, 0 0 12px #00ff6a; }
     to { text-shadow: 0 0 12px #00ff6a, 0 0 20px #00ffff; }
   }
 
+  /* HAMBURGER MENU BUTTON */
+  .menu-btn {
+    position: absolute;
+    left: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #fff;
+    user-select: none;
+    z-index: 10;
+  }
+
+  /* SIDEBAR DRAWER */
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    z-index: 90;
+  }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 270px;
+    height: 100vh;
+    background: #121622;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 4px 0 15px rgba(0, 255, 255, 0.1);
+    transition: left 0.3s ease;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+  }
+  .sidebar.active {
+    left: 0;
+  }
+  .new-chat-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    background: linear-gradient(45deg, #00ffa8, #00e0ff);
+    color: #000;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 255, 168, 0.3);
+  }
+  .history-title {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .history-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .history-item {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 14px;
+    color: #ccc;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: 1px solid transparent;
+    user-select: none;
+    transition: 0.2s;
+  }
+  .history-item.active {
+    background: rgba(0, 224, 255, 0.15);
+    border-color: #00e0ff;
+    color: #fff;
+  }
+  .history-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  /* CONTEXT MENU FOR DELETE */
+  .delete-context-menu {
+    position: fixed;
+    display: none;
+    z-index: 200;
+    background: #1f2430;
+    border: 1px solid #ff4d4d;
+    border-radius: 8px;
+    box-shadow: 0 0 12px rgba(255, 77, 77, 0.3);
+    padding: 6px;
+  }
+  .delete-btn {
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 13px;
+    width: 100%;
+  }
+
+  /* MAIN CHAT UI */
   .chat-container {
     background: rgba(255, 255, 255, 0.07);
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -108,7 +233,7 @@
     color: white;
     outline: none;
   }
-  button {
+  button.send-btn {
     margin-left: 8px;
     padding: 10px 16px;
     border-radius: 50px;
@@ -119,7 +244,7 @@
     cursor: pointer;
     transition: 0.2s;
   }
-  button:hover { background: linear-gradient(45deg, #00e0ff, #00ffa8); }
+  button.send-btn:hover { background: linear-gradient(45deg, #00e0ff, #00ffa8); }
 
   .global-timer {
     font-size: 13px;
@@ -130,7 +255,21 @@
 </head>
 <body>
 
-<header>01 MATTERIX AI🤖</header>
+<div class="sidebar-overlay" id="overlay"></div>
+<div class="sidebar" id="sidebar">
+  <button class="new-chat-btn" id="newChatBtn">+ New Chat</button>
+  <div class="history-title">Chat History</div>
+  <div class="history-list" id="historyList"></div>
+</div>
+
+<div class="delete-context-menu" id="deleteContextMenu">
+  <button class="delete-btn" id="deleteChatBtn">Delete Chat</button>
+</div>
+
+<header>
+  <span class="menu-btn" id="menuBtn">☰</span>
+  01 MATTERIX AI🤖
+</header>
 
 <div class="chat-container" id="chat">
   <div class="bubble ai">Hi, I'm Matterix Ai 👋</div>
@@ -148,7 +287,7 @@
 
 <div class="input-area">
   <input id="userInput" placeholder="Ask Matterix Ai Anything..." autocomplete="off" />
-  <button id="askBtn">Ask ↑</button>
+  <button class="send-btn" id="askBtn">Ask ↑</button>
 </div>
 
 <script>
@@ -160,8 +299,148 @@ const typingBox = document.getElementById("typingBox");
 const localTimer = typingBox.querySelector(".timer");
 const responseTimeDisplay = document.querySelector(".global-timer .time");
 
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+const newChatBtn = document.getElementById("newChatBtn");
+const historyList = document.getElementById("historyList");
+const deleteContextMenu = document.getElementById("deleteContextMenu");
+const deleteChatBtn = document.getElementById("deleteChatBtn");
+
 let localStart, localInterval;
 
+// =========================
+// MULTI-CHAT & LOCAL STORAGE MEMORY
+// =========================
+let allSessions = JSON.parse(localStorage.getItem("matterix_sessions")) || {};
+let currentSessionId = null;
+let chatHistory = [];
+let targetDeleteId = null;
+let pressTimer = null;
+
+function initSession() {
+  const keys = Object.keys(allSessions);
+  if (keys.length > 0) {
+    loadSession(keys[0]);
+  } else {
+    createNewChat();
+  }
+  renderHistory();
+}
+
+function createNewChat() {
+  currentSessionId = "chat_" + Date.now();
+  chatHistory = [];
+  allSessions[currentSessionId] = {
+    title: "New Conversation",
+    history: [],
+    html: `<div class="bubble ai">Hi, I'm Matterix Ai 👋</div>`
+  };
+  saveSessions();
+  renderHistory();
+  loadSession(currentSessionId);
+}
+
+function saveSessions() {
+  localStorage.setItem("matterix_sessions", JSON.stringify(allSessions));
+}
+
+function loadSession(id) {
+  currentSessionId = id;
+  chatHistory = allSessions[id].history || [];
+  chatBox.innerHTML = allSessions[id].html || `<div class="bubble ai">Hi, I'm Matterix Ai 👋</div>`;
+  renderHistory();
+  closeSidebar();
+}
+
+function saveCurrentState() {
+  if (!currentSessionId) return;
+  allSessions[currentSessionId].history = chatHistory;
+  allSessions[currentSessionId].html = chatBox.innerHTML;
+  
+  if (allSessions[currentSessionId].title === "New Conversation" && chatHistory.length > 0) {
+    const firstText = chatHistory[0].parts[0].text;
+    allSessions[currentSessionId].title = firstText.length > 20 ? firstText.substring(0, 20) + "..." : firstText;
+  }
+  saveSessions();
+  renderHistory();
+}
+
+function renderHistory() {
+  historyList.innerHTML = "";
+  Object.keys(allSessions).reverse().forEach(id => {
+    const item = document.createElement("div");
+    item.className = "history-item " + (id === currentSessionId ? "active" : "");
+    item.textContent = allSessions[id].title;
+
+    item.onclick = () => loadSession(id);
+
+    item.addEventListener("touchstart", (e) => startPress(e, id));
+    item.addEventListener("touchend", cancelPress);
+    item.addEventListener("mousedown", (e) => startPress(e, id));
+    item.addEventListener("mouseup", cancelPress);
+    item.addEventListener("mouseleave", cancelPress);
+
+    historyList.appendChild(item);
+  });
+}
+
+function startPress(e, id) {
+  cancelPress();
+  pressTimer = setTimeout(() => {
+    targetDeleteId = id;
+    const rect = e.target.getBoundingClientRect();
+    deleteContextMenu.style.left = rect.left + "px";
+    deleteContextMenu.style.top = (rect.bottom + 5) + "px";
+    deleteContextMenu.style.display = "block";
+  }, 600);
+}
+
+function cancelPress() {
+  if (pressTimer) clearTimeout(pressTimer);
+}
+
+deleteChatBtn.onclick = () => {
+  if (targetDeleteId) {
+    delete allSessions[targetDeleteId];
+    saveSessions();
+    deleteContextMenu.style.display = "none";
+    
+    if (targetDeleteId === currentSessionId) {
+      const keys = Object.keys(allSessions);
+      if (keys.length > 0) {
+        loadSession(keys[0]);
+      } else {
+        createNewChat();
+      }
+    } else {
+      renderHistory();
+    }
+  }
+};
+
+document.addEventListener("click", (e) => {
+  if (!deleteContextMenu.contains(e.target)) {
+    deleteContextMenu.style.display = "none";
+  }
+});
+
+menuBtn.onclick = () => {
+  sidebar.classList.add("active");
+  overlay.style.display = "block";
+};
+overlay.onclick = closeSidebar;
+
+function closeSidebar() {
+  sidebar.classList.remove("active");
+  overlay.style.display = "none";
+}
+
+newChatBtn.onclick = createNewChat;
+
+// =========================
+// TIMER & CHAT LOGIC
+// =========================
 function startTimers() {
   typingBox.style.display = "flex";
   localStart = Date.now();
@@ -181,16 +460,17 @@ function stopTimers() {
 function addMessage(text, cls) {
   const div = document.createElement("div");
   div.className = "bubble " + cls;
-  div.innerHTML = text;
+  div.textContent = text;
   chatBox.appendChild(div);
   chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: "smooth" });
+  saveCurrentState();
+  return div;
 }
 
 function cleanResponse(text) {
   return text
     .replace(/[*#`_>]/g, "")
     .replace(/\n{3,}/g, "\n\n")
-    .replace(/\n/g, "<br>")
     .trim();
 }
 
@@ -200,8 +480,9 @@ function isMathExpression(str) {
 
 function calculateMath(expr) {
   try {
-    const result = eval(expr.replace(/sqrt([^)]+)/g, "Math.sqrt($1)"));
-    if (isNaN(result)) return "❌ Invalid math expression.";
+    const cleanExpr = expr.toLowerCase().replace(/sqrt\(([^)]+)\)/g, "Math.sqrt($1)");
+    const result = eval(cleanExpr);
+    if (isNaN(result) || result === Infinity) return "❌ Invalid math expression.";
     return Number.isInteger(result)
       ? result.toString()
       : result + "  (≈ " + result.toFixed(2) + ")";
@@ -218,14 +499,21 @@ function customResponse(q) {
     return "Yes, I'm, and I'm glad I can answer correct answers ✅";
   if (lower.includes("what is your name") || lower.includes("tumhara naam kya hai") || lower.includes("aapka naam kya hai") || lower.includes("naam kya hai") || lower.includes("your name"))
     return "My name is Matterix Ai 🤖";
-  if (lower.includes("who made you"))
-    return "I am a LLM Artificial Intelligence made by Anurag Kishor.";
   return null;
 }
 
 async function askMatterix(q) {
   addMessage(q, "user");
   startTimers();
+
+  chatHistory.push({
+    role: "user",
+    parts: [{ text: q }]
+  });
+
+  if (chatHistory.length > 40) {
+    chatHistory.splice(0, 2);
+  }
 
   if (isMathExpression(q)) {
     addMessage(calculateMath(q), "ai");
@@ -242,24 +530,95 @@ async function askMatterix(q) {
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 6000);
+    const timeout = setTimeout(() => controller.abort(), 60000);
+
+    // FIXED: Using valid endpoint gemini-2.5-flash with streamGenerateContent for streaming responses
     const res = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" + API_KEY,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=" + API_KEY + "&alt=sse",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: q }]}] }),
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{
+              text: `You are MatterixAI.
+
+Never use LaTeX, Markdown math, or $$...$$ notation.
+Write mathematics in plain text using symbols like ×, ÷, √ and ^.
+Always give clean, readable answers.
+Do not output raw formatting commands like \\times, \\frac, \\sqrt, $$, or Markdown syntax.
+
+You are made by Anurag Kishor. If anyone asks you who made you, who owns you, or anything like that, say "I am a LLM Artificial Intelligence made by Anurag Kishor."`
+            }]
+          },
+          contents: chatHistory
+        }),
         signal: controller.signal
       }
     );
+
     clearTimeout(timeout);
-    const data = await res.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "❌ No response";
-    addMessage(cleanResponse(text), "ai");
-  } catch {
-    addMessage("⚠️ Error or timeout, please try again.", "ai");
+
+    if (!res.ok) throw new Error("API Network error or invalid request.");
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+    let accumulatedText = "";
+    let aiBubble = null;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split("\n");
+
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          const jsonStr = line.replace("data: ", "").trim();
+          if (!jsonStr) continue;
+          try {
+            const data = JSON.parse(jsonStr);
+            const partText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (partText) {
+              accumulatedText += partText;
+              if (!aiBubble) {
+                aiBubble = addMessage(cleanResponse(accumulatedText), "ai");
+              } else {
+                aiBubble.textContent = cleanResponse(accumulatedText);
+                chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: "smooth" });
+              }
+            }
+          } catch (e) {
+            // Ignore partial SSE JSON chunk errors
+          }
+        }
+      }
+    }
+
+    if (!accumulatedText) {
+      addMessage("❌ No response", "ai");
+    } else {
+      chatHistory.push({
+        role: "model",
+        parts: [{ text: accumulatedText }]
+      });
+      if (chatHistory.length > 40) {
+        chatHistory.splice(0, 2);
+      }
+    }
+
+  } catch (err) {
+    console.error(err);
+    if (err.name === 'AbortError') {
+      addMessage("⚠️ Error: Request timed out. Please try asking again!", "ai");
+    } else {
+      addMessage("⚠️ " + err.message, "ai");
+    }
+  } finally {
+    stopTimers();
+    saveCurrentState();
   }
-  stopTimers();
 }
 
 askBtn.onclick = () => {
@@ -267,9 +626,12 @@ askBtn.onclick = () => {
   askMatterix(input.value.trim());
   input.value = "";
 };
+
 input.addEventListener("keypress", e => {
   if (e.key === "Enter") askBtn.click();
 });
+
+initSession();
 </script>
 </body>
 </html>
