@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MATTERIX AI 4.1 v.0.1.7 Pro</title>
+
+<!-- Google Search Console Verification Tag -->
+<meta name="google-site-verification" content="IZg6wywpr1xQH89vA1zJ7nnAHFwwiWux2LePPavXNyQ" />
+
+<title>MATTERIX AI 4.2 v.0.2.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
@@ -218,7 +222,6 @@
     color: #aaa;
   }
 
-  /* Custom Modal Popup for Long Press Delete */
   .modal-overlay {
     position: fixed;
     top: 0;
@@ -305,7 +308,6 @@
   <button id="askBtn">Ask ↑</button>
 </div>
 
-<!-- Modal Popup for Chat Deletion -->
 <div class="modal-overlay" id="deleteModal">
   <div class="modal-box">
     <div class="modal-title">Delete Chat?</div>
@@ -317,7 +319,6 @@
 </div>
 
 <script>
-// Base64 Encoded API Key
 const ENCRYPTED_API_KEY = "QVEuQWI4Uk42Sl9qeHoxcFRHcFlhVG9HdS03UDdPQVh4MDRHV3lBSE5RWlF1Vmw3c1BCV0E=";
 
 function getActiveKey() {
@@ -348,7 +349,6 @@ const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
 
 let localStart, localInterval;
 
-// MATTERIX MULTI-SESSION & MEMORY SYSTEM
 let allSessions = JSON.parse(localStorage.getItem("matterix_sessions")) || {};
 let currentSessionId = null;
 let targetDeleteId = null;
@@ -442,7 +442,6 @@ function renderHistory() {
     let pressTimer = null;
     let isLongPress = false;
 
-    // Mobile Long Press
     item.addEventListener("touchstart", (e) => {
       isLongPress = false;
       pressTimer = setTimeout(() => {
@@ -454,7 +453,6 @@ function renderHistory() {
     item.addEventListener("touchend", () => clearTimeout(pressTimer));
     item.addEventListener("touchmove", () => clearTimeout(pressTimer));
 
-    // Desktop Right Click
     item.oncontextmenu = (e) => {
       e.preventDefault();
       openDeleteModal(id);
@@ -540,7 +538,6 @@ function customResponse(q) {
   if (lower.includes("what is your name") || lower.includes("tumhara naam kya hai") || lower.includes("aapka naam kya hai") || lower.includes("naam kya hai") || lower.includes("your name"))
     return "My name is Matterix Ai 🤖";
   
-  // Custom Response for Creator/Owner/Developer Questions
   if (
     lower.includes("who made you") ||
     lower.includes("who created you") ||
