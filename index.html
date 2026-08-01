@@ -539,8 +539,23 @@ function customResponse(q) {
     return "Yes, I'm, and I'm glad I can answer correct answers ✅";
   if (lower.includes("what is your name") || lower.includes("tumhara naam kya hai") || lower.includes("aapka naam kya hai") || lower.includes("naam kya hai") || lower.includes("your name"))
     return "My name is Matterix Ai 🤖";
-  if (lower.includes("who made you"))
-    return "I am a LLM Artificial Intelligence made by Anurag Kishor.";
+  
+  // Custom Response for Creator/Owner/Developer Questions
+  if (
+    lower.includes("who made you") ||
+    lower.includes("who created you") ||
+    lower.includes("who is your owner") ||
+    lower.includes("who is your creator") ||
+    lower.includes("who built you") ||
+    lower.includes("who developed you") ||
+    lower.includes("tumhe kisine banaya") ||
+    lower.includes("kisine banaya") ||
+    lower.includes("owner kaun hai") ||
+    lower.includes("creator kaun hai")
+  ) {
+    return "I am an Artificial Intelligence made by Anurag Kishor.";
+  }
+
   return null;
 }
 
@@ -585,6 +600,8 @@ async function askMatterix(q) {
           systemInstruction: {
             parts: [{
               text: `You are MatterixAI.
+
+If anyone asks who made you, who created you, who is your owner, or who developed you, ALWAYS answer: "I am an Artificial Intelligence made by Anurag Kishor."
 
 Never use LaTeX, Markdown math, or $$...$$ notation.
 Write mathematics in plain text using symbols like ×, ÷, √ and ^.
